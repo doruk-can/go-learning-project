@@ -1,0 +1,201 @@
+basePath: /
+definitions:
+  models.CreateSessionRequest:
+    type: object
+  models.CreateSessionResponse:
+    properties:
+      session_id:
+        description: |-
+          The unique session ID
+          Required: true
+        type: string
+    type: object
+  models.EmptyResponse:
+    type: object
+  models.ErrorResponse:
+    properties:
+      message:
+        description: |-
+          Error message
+          Required: true
+        type: string
+    type: object
+  models.GetAggregatedScoresResponse:
+    properties:
+      scores:
+        description: |-
+          List of aggregated product scores
+          Required: true
+        items:
+          $ref: '#/definitions/models.ProductScore'
+        type: array
+    type: object
+  models.GetVotesResponse:
+    properties:
+      votes:
+        description: |-
+          List of votes
+          Required: true
+        items:
+          $ref: '#/definitions/models.Vote'
+        type: array
+    type: object
+  models.ProductScore:
+    properties:
+      avgScore:
+        type: number
+      productID:
+        type: string
+      voteCount:
+        type: integer
+    type: object
+  models.SaveVoteRequest:
+    properties:
+      product_id:
+        description: |-
+          The product ID
+          Required: true
+        type: string
+      score:
+        description: |-
+          The score (e.g., rating from 1 to 5)
+          Required: true
+        type: integer
+      session_id:
+        description: |-
+          The session ID
+          Required: true
+        type: string
+    type: object
+  models.Vote:
+    properties:
+      id:
+        type: string
+      productID:
+        type: string
+      score:
+        type: integer
+      sessionID:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: This is the API documentation for Foover.
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://example.com/terms/
+  title: Foover API
+  version: "1.0"
+paths:
+  /aggregated-scores:
+    get:
+      description: Retrieves aggregated average scores for products across all session
+        IDs.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetAggregatedScoresResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get aggregated product scores
+      tags:
+      - aggregation
+  /sessions:
+    post:
+      consumes:
+      - application/json
+      description: Generates a unique session ID.
+      parameters:
+      - description: Session creation request
+        in: body
+        name: session
+        schema:
+          $ref: '#/definitions/models.CreateSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CreateSessionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Create a new session
+      tags:
+      - sessions
+  /votes:
+    post:
+      consumes:
+      - application/json
+      description: Stores or updates a product vote for a given session ID.
+      parameters:
+      - description: Vote object that needs to be added or updated
+        in: body
+        name: vote
+        required: true
+        schema:
+          $ref: '#/definitions/models.SaveVoteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Save or update a vote
+      tags:
+      - votes
+  /votes/{session_id}:
+    get:
+      description: Retrieves existing votes for products for a given session ID.
+      parameters:
+      - description: The session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetVotesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get votes by session ID
+      tags:
+      - votes
+swagger: "2.0"
